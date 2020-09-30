@@ -1,0 +1,10 @@
+{
+    "type": "record",
+    "namespace": "com.fox.multiplier",
+    "name": "SquaringKafkaMessage",
+    "version": "1",
+    "fields": [
+        {"name": "sum", "type": "long", "doc": "Received sum"},
+        {"name": "square", "type": "string", "doc": "Sum square"}
+    ]
+}

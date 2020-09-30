@@ -1,0 +1,96 @@
+image: maven:latest
+
+stages:
+  - build
+  - package
+  - run
+  - test
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .m2/repository
+
+
+Package Generator:
+  stage: package
+  script:
+    - cd generator
+    - ./mvnw $MAVEN_OPTS package
+  artifacts:
+    paths:
+      - generator/target/*.jar
+    expire_in: 1 week
+
+Package Adder:
+  stage: package
+  script:
+    - cd adder
+    - ./mvnw $MAVEN_OPTS package
+  artifacts:
+    paths:
+      - adder/target/*.jar
+    expire_in: 1 week
+
+Package Multiplier:
+  stage: package
+  script:
+    - cd multiplier
+    - ./mvnw $MAVEN_OPTS package
+  artifacts:
+    paths:
+      - multiplier/target/*.jar
+    expire_in: 1 week
+
+Run Generator:
+  stage: run
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - cd generator
+    - "cp $(ls target/*.jar) docker/gitlabci.jar"
+    - cd docker
+    - docker build -t $CI_REGISTRY_IMAGE:my_docker_image .
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker push $CI_REGISTRY_IMAGE:my_docker_image
+
+Run Adder:
+  stage: run
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - cd adder
+    - "cp $(ls target/*.jar) docker/gitlabci.jar"
+    - cd docker
+    - docker build -t $CI_REGISTRY_IMAGE:my_docker_image .
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker push $CI_REGISTRY_IMAGE:my_docker_image
+
+Run Multiplier:
+  stage: run
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - cd multiplier
+    - "cp $(ls target/*.jar) docker/gitlabci.jar"
+    - cd docker
+    - docker build -t $CI_REGISTRY_IMAGE:my_docker_image .
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker push $CI_REGISTRY_IMAGE:my_docker_image
+
+
+#Test:
+#  stage: test
+#  script:
+#    - mvn test
+#  artifacts:
+#    paths:
+#      - target/surfire-reports/TEST-*.xml
+#    reports:
+#      junit: target/surfire-reports/TEST-*.xml

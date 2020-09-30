@@ -1,0 +1,11 @@
+{
+    "type": "record",
+    "namespace": "com.fox.generator",
+    "name": "Number",
+    "version" : "1",
+    "fields" : [
+        {"name": "numberOne", "type": "int", "doc": "First operand of the sum"},
+        {"name": "numberTwo", "type": "int", "doc": "Second operand of the sum"},
+        {"name": "sum", "type": ["null", "long"], "default": null, "doc": "Sum of two integers"}
+    ]
+}
